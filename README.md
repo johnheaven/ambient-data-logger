@@ -1,5 +1,5 @@
 # ambient-data-logger
-Pulls in data from an API (e.g. Raspberry Pico with ambient data sensors) and adds them to a CSV.
+Pulls in data from an API (e.g. [Raspberry Pico with ambient data sensors](https://github.com/johnheaven/pico-ambient-data-api/tree/main)) and adds them to a CSV.
 
 It's designed to be run with a cron job, so doesn't do any timing.
 
