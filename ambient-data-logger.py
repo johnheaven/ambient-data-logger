@@ -2,32 +2,48 @@ import requests
 import time
 import csv
 
-sensor_id = 1
+from ip_search import ip_search
+
+sensor_id = '1'
+# last 3 digits of IP address so we can find the right one by trial and error
+starting_ip_last_3 = 135
+
+ips = ip_search(current_ip_last_3=142, ip_min=130, ip_max=200)
 
 ### GET DATA
 
-# Get a random number from random.org API
-API_attempts = 0
-http_response = None
+success = False
 
-# Try 5 times to get a reading
-while http_response != 200:
-    response = requests.get(url='http://192.168.2.135/data/', timeout=2)
-    http_response = response.status_code
-    print ('HTTP response: ', http_response)
-    # 200 means success
-    if http_response == 200:
-        ambient_data = response.json()
-        break
+# run a loop until we get success or we run out of IPs to try
+while (not success) and (ips.get_ip()):
+    try:
+        pico_url = ips.get_ip()
+        print(f'Trying URL {pico_url}')
+        response = requests.get(url=pico_url, timeout=5)
+    except:
+        print('Connection attempt failed.')
+    else:
+        # get the response code
+        http_response = response.status_code
+        print ('HTTP response: ', http_response)
+        # 200 means success
+        if http_response == 200:
+            # get data from JSON
+            ambient_data = response.json()
+            # check whether it's from the right Pico (for the case that there are several)
+            if ambient_data['pico_id'] == sensor_id:
+                success = True
+    # bump the IP up one so we can try it next
+    ips.bump_sensor_ip()
+    if not ips.get_ip():
+        print(f'Couldn\'t find device with sensor ID {sensor_id}')
 
-    API_attempts += 1
-    time.sleep(2)
 
-ambient_data.insert(0, time.asctime(time.localtime()))
-
+ambient_data['time'] = time.asctime(time.localtime())
+print(ambient_data)
 ### WRITE TO CSV
-# assuming headers are already present
 
-with open(f"{sensor_id}_ambient_data.csv", mode='a', newline="") as csvfile:
-    writer = csv.writer(csvfile)
+# assuming headers are already present
+with open(f'{sensor_id}_ambient_data.csv', mode='a', newline='') as csvfile:
+    writer = csv.DictWriter(csvfile, fieldnames=('time', 'temp', 'pressure', 'humidity', 'sensor', 'pico_id'))
     writer.writerow(ambient_data)
