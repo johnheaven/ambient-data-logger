@@ -1,6 +1,7 @@
 import requests
 import time
 import csv
+import json
 from os import environ
 
 from ip_search import ip_search
@@ -8,7 +9,13 @@ from ip_search import ip_search
 sensor_id = '1'
 
 # last 3 digits of IP address so we can find the right one by trial and error
-starting_ip_last_3 = int(environ.get('LOGGING_SENSOR_IP_%s' % sensor_id, False) or '143')
+try:
+    previous_best = json.load(open('best-ip-cache.json', 'r'))
+except FileNotFoundError as e:
+    print(e)
+    starting_ip_last_3 = 145
+else:
+    starting_ip_last_3 = previous_best
 
 ips = ip_search(starting_ip_last_3=starting_ip_last_3, max_steps=50)
 
@@ -17,9 +24,9 @@ ips = ip_search(starting_ip_last_3=starting_ip_last_3, max_steps=50)
 success = False
 
 # run a loop until we get success or we run out of IPs to try
-while (not success) and (ips.get_ip()):
+while (not success) and (ips.get_uri()):
     try:
-        pico_url = ips.get_ip()
+        pico_url = ips.get_uri()
         print('Trying URL %s' % pico_url)
         response = requests.get(url=pico_url, timeout=5)
     except:
@@ -39,17 +46,19 @@ while (not success) and (ips.get_ip()):
                 # check whether it's from the right Pico (for the case that there are several)
                 if ambient_data['pico_id'] == sensor_id:
                     success = True
-    # bump the IP up one so we can try it next
-    ips.bump_sensor_ip()
-    if not ips.get_ip():
-        print('Couldn\'t find device with sensor ID %s' % sensor_id)
+    # bump the IP up one so we can try it next.
+    # don't do this if success==True so we can preserve the right value for storing in env var later
+    if not success:
+        ips.bump_sensor_ip()
+        if not ips.get_uri():
+            print('Couldn\'t find device with sensor ID %s' % sensor_id)
 
 
 ambient_data['time'] = time.asctime(time.localtime())
 print(ambient_data)
 
-### WRITE IP TO ENV VAR FOR NEXT TIME
-environ['LOGGING_SENSOR_IP_%s' % sensor_id] = str(ips.get_ip())
+### WRITE IP TO JSON FOR NEXT TIME
+json.dump(ips.get_current(), open('best-ip-cache.json', 'w'))
 
 ### WRITE TO CSV
 

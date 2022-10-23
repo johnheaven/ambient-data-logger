@@ -1,5 +1,5 @@
 class ip_search():
-    def __init__(self, starting_ip_last_3, max_steps=20, ip_template='http://192.168.2.%i/data/'):
+    def __init__(self, starting_ip_last_3, max_steps=20, ip_template='http://192.168.2.%s/data/'):
         self.current = starting_ip_last_3
         self.starting = starting_ip_last_3
         # maximum number of steps to take in either direction
@@ -15,11 +15,14 @@ class ip_search():
         # number of steps taken so far
         self.steps_taken = 0
     
-    def get_ip(self):
+    def get_uri(self):
         if self.exhausted:
             return False
         else:
             return self.ip_template % self.current
+
+    def get_current(self):
+        return self.current
 
     def bump_sensor_ip(self):
         # try a different IP by bumping up or down - it 'radiates' out from initial
@@ -32,7 +35,3 @@ class ip_search():
             self.current = self.starting - self.steps_taken
         
         self.add_next = not self.add_next
-
-    def get_next_ip(self):
-        self.bump_sensor_ip()
-        return self.get_ip()
