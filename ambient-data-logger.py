@@ -29,10 +29,14 @@ while (not success) and (ips.get_ip()):
         # 200 means success
         if http_response == 200:
             # get data from JSON
-            ambient_data = response.json()
-            # check whether it's from the right Pico (for the case that there are several)
-            if ambient_data['pico_id'] == sensor_id:
-                success = True
+            try:
+                ambient_data = response.json()
+            except ValueError as e:
+                print(e)
+            else:
+                # check whether it's from the right Pico (for the case that there are several)
+                if ambient_data['pico_id'] == sensor_id:
+                    success = True
     # bump the IP up one so we can try it next
     ips.bump_sensor_ip()
     if not ips.get_ip():
