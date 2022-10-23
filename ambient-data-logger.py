@@ -1,14 +1,16 @@
 import requests
 import time
 import csv
+from os import environ
 
 from ip_search import ip_search
 
 sensor_id = '1'
-# last 3 digits of IP address so we can find the right one by trial and error
-starting_ip_last_3 = 135
 
-ips = ip_search(current_ip_last_3=142, ip_min=130, ip_max=200)
+# last 3 digits of IP address so we can find the right one by trial and error
+starting_ip_last_3 = int(environ.get('LOGGING_SENSOR_IP_%s' % sensor_id, False) or '143')
+
+ips = ip_search(starting_ip_last_3=starting_ip_last_3, max_steps=50)
 
 ### GET DATA
 
@@ -41,6 +43,10 @@ while (not success) and (ips.get_ip()):
 
 ambient_data['time'] = time.asctime(time.localtime())
 print(ambient_data)
+
+### WRITE IP TO ENV VAR FOR NEXT TIME
+environ['LOGGING_SENSOR_IP_%s' % sensor_id] = str(ips.get_ip())
+
 ### WRITE TO CSV
 
 # assuming headers are already present
