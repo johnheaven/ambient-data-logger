@@ -44,6 +44,6 @@ print(ambient_data)
 ### WRITE TO CSV
 
 # assuming headers are already present
-with open('{sensor_id}_ambient_data.csv' % {'sensor_id': sensor_id}, mode='a', newline='') as csvfile:
+with open('%s_ambient_data.csv' % sensor_id, mode='a', newline='') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=('time', 'temp', 'pressure', 'humidity', 'sensor', 'pico_id'))
     writer.writerow(ambient_data)
