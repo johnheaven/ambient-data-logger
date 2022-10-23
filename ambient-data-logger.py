@@ -18,7 +18,7 @@ success = False
 while (not success) and (ips.get_ip()):
     try:
         pico_url = ips.get_ip()
-        print(f'Trying URL {pico_url}')
+        print('Trying URL %s' % pico_url)
         response = requests.get(url=pico_url, timeout=5)
     except:
         print('Connection attempt failed.')
@@ -36,7 +36,7 @@ while (not success) and (ips.get_ip()):
     # bump the IP up one so we can try it next
     ips.bump_sensor_ip()
     if not ips.get_ip():
-        print(f'Couldn\'t find device with sensor ID {sensor_id}')
+        print('Couldn\'t find device with sensor ID %s' % sensor_id)
 
 
 ambient_data['time'] = time.asctime(time.localtime())
@@ -44,6 +44,6 @@ print(ambient_data)
 ### WRITE TO CSV
 
 # assuming headers are already present
-with open(f'{sensor_id}_ambient_data.csv', mode='a', newline='') as csvfile:
+with open('{sensor_id}_ambient_data.csv' % {'sensor_id': sensor_id}, mode='a', newline='') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=('time', 'temp', 'pressure', 'humidity', 'sensor', 'pico_id'))
     writer.writerow(ambient_data)
