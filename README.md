@@ -16,7 +16,3 @@ You might have several Picos collecting data in different rooms or places. Curre
 ## Setup
 
 You need to copy the `example-settings.py` file to `settings.py` and enter the Pico IDs you want to search for (not UUIDs, although that might be a better approach in the future).
-
-## Designed for the Raspberry Pi
-
-I run this on my Raspberry Pi 4, which has an ancient Python 3 version installed on it (sigh). Thus, f-strings aren't supported, which is why I use the % notation.
