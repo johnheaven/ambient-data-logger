@@ -59,14 +59,15 @@ for sensor_id in sensor_ids:
     print(ambient_data)
 
     ### WRITE IP TO JSON FOR NEXT TIME
-    json.dump(ips.get_current(), open(f'best-ip-cache__{sensor_id}.json', 'w'))
+    sensor_id_clean = sensor_id.replace(' ', '_')
+    json.dump(ips.get_current(), open(f'best-ip-cache__{ sensor_id_clean }.json', 'w'))
 
     all_ambient_data.append(ambient_data)
 
     ### WRITE TO CSV
 
 # assuming headers are already present
-with open(f'{sensor_id}_ambient_data.csv', mode='a', newline='') as csvfile:
+with open(f'ambient_data.csv', mode='a', newline='') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=('time', 'temp', 'pressure', 'humidity', 'sensor', 'pico_id', 'pico_uuid'))
     for ambient_data in all_ambient_data:
         writer.writerow(ambient_data)
