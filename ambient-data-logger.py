@@ -18,7 +18,7 @@ for sensor_id in sensor_ids:
     else:
         starting_ip_last_3 = previous_best
 
-    ips = ip_search(starting_ip_last_3=starting_ip_last_3, max_steps=50)
+    ips = ip_search(starting_ip_last_3=starting_ip_last_3, max_steps=10)
 
     ### GET DATA
 
