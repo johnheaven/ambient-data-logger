@@ -8,6 +8,8 @@ from settings import sensor_ids
 
 all_ambient_data = []
 
+sensor_id_clean = sensor_id.replace(' ', '_')
+
 for sensor_id in sensor_ids:
 # last 3 digits of IP address so we can find the right one by trial and error
     try:
@@ -59,7 +61,6 @@ for sensor_id in sensor_ids:
     print(ambient_data)
 
     ### WRITE IP TO JSON FOR NEXT TIME
-    sensor_id_clean = sensor_id.replace(' ', '_')
     json.dump(ips.get_current(), open(f'cache/best-ip-cache__{ sensor_id_clean }.json', 'w'))
 
     all_ambient_data.append(ambient_data)
