@@ -11,7 +11,7 @@ all_ambient_data = []
 for sensor_id in sensor_ids:
 # last 3 digits of IP address so we can find the right one by trial and error
     try:
-        previous_best = json.load(open(f'best-ip-cache__{sensor_id}.json', 'r'))
+        previous_best = json.load(open(f'cache/best-ip-cache__{sensor_id}.json', 'r'))
     except FileNotFoundError as e:
         print(e)
         starting_ip_last_3 = 145
@@ -60,14 +60,14 @@ for sensor_id in sensor_ids:
 
     ### WRITE IP TO JSON FOR NEXT TIME
     sensor_id_clean = sensor_id.replace(' ', '_')
-    json.dump(ips.get_current(), open(f'best-ip-cache__{ sensor_id_clean }.json', 'w'))
+    json.dump(ips.get_current(), open(f'cache/best-ip-cache__{ sensor_id_clean }.json', 'w'))
 
     all_ambient_data.append(ambient_data)
 
     ### WRITE TO CSV
 
 # assuming headers are already present
-with open(f'ambient_data.csv', mode='a', newline='') as csvfile:
+with open(f'data/ambient_data.csv', mode='a', newline='') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=('time', 'temp', 'pressure', 'humidity', 'sensor', 'pico_id', 'pico_uuid'))
     for ambient_data in all_ambient_data:
         writer.writerow(ambient_data)
