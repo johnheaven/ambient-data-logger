@@ -8,12 +8,11 @@ from settings import sensor_ids
 
 all_ambient_data = []
 
-sensor_id_clean = sensor_id.replace(' ', '_')
-
 for sensor_id in sensor_ids:
-# last 3 digits of IP address so we can find the right one by trial and error
+    sensor_id_clean = sensor_id.replace(' ', '_')
+    # last 3 digits of IP address so we can find the right one by trial and error
     try:
-        previous_best = json.load(open(f'cache/best-ip-cache__{sensor_id}.json', 'r'))
+        previous_best = json.load(open(f'cache/best-ip-cache__{sensor_id_clean}.json', 'r'))
     except FileNotFoundError as e:
         print(e)
         starting_ip_last_3 = 145
