@@ -1,1 +1,4 @@
 requests
+sqlalchemy
+python-dotenv
+psycopg2

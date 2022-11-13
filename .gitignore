@@ -5,3 +5,4 @@ settings.py
 .venv
 data/* !.gitkeep
 cache/* !.gitkeep
+.env

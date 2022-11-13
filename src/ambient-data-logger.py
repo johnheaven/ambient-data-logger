@@ -2,9 +2,11 @@ import requests
 import time
 import csv
 import json
+from sqlalchemy import insert, table, text
 
 from ip_search.ip_search import ip_search
 from settings import sensor_ids
+from sqldb.sqldb import get_sql_engine
 
 all_ambient_data = []
 
@@ -64,10 +66,26 @@ for sensor_id in sensor_ids:
 
     all_ambient_data.append(ambient_data)
 
-    ### WRITE TO CSV
+### WRITE TO CSV
 
 # assuming headers are already present
+fieldnames = ('time', 'temp', 'pressure', 'humidity', 'sensor', 'pico_id', 'pico_uuid')
 with open(f'data/ambient_data.csv', mode='a', newline='') as csvfile:
-    writer = csv.DictWriter(csvfile, fieldnames=('time', 'temp', 'pressure', 'humidity', 'sensor', 'pico_id', 'pico_uuid'))
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     for ambient_data in all_ambient_data:
         writer.writerow(ambient_data)
+
+### WRITE TO SQL
+engine = get_sql_engine()
+
+from sqlalchemy import insert
+from sqlalchemy.schema import Table, MetaData
+
+ambient_data_table = Table('ambient_data', MetaData(), autoload_with=engine)
+
+with engine.connect() as conn:
+    # see example: https://stackoverflow.com/questions/64090818/unconsumed-column-names-sqlalchemy-python
+    for ambient_data in all_ambient_data:
+        conn.execute(
+            ambient_data_table.insert(ambient_data)
+        )
