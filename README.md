@@ -1,9 +1,9 @@
 # ambient-data-logger
-Pulls in data from an API (e.g. [Raspberry Pico with ambient data sensors](https://github.com/johnheaven/pico-ambient-data-api/tree/main)) and adds them to a CSV, one for each sensor.
+Pulls in data from an API (e.g. [Raspberry Pico with ambient data sensors](https://github.com/johnheaven/pico-ambient-data-api/tree/main)) and adds them to a CSV, recording which room, Pico and sensor type the data originated from.
 
 It's designed to be run with a cron job, so doesn't do any timing.
 
-My current set-up is a Raspberry Pico that exposes a simple API on the local network. This has information about ambient data (temperature, pressure, humidity). It also contains an ID and a UUID.
+My current set-up is a Raspberry Pico that exposes a simple API on the local network. This has information about ambient data (temperature, pressure, humidity). It also contains an ID and a UUID. The UUID is useful for specifying individual settings for different Picos, e.g. the name of the room and – if they have different sensor types - the type of sensor.
 
 ## Pico discovery hack
 
@@ -11,8 +11,8 @@ The problem is that the Pico can't set a hostname, and my router doesn't allow m
 
 ## Multiple Picos
 
-You might have several Picos collecting data in different rooms or places. Currently, it just saves a separate CSV for each of these as a good-enough solution.
+You might have several Picos collecting data in different rooms or places. Currently, it saves .
 
 ## Setup
 
-You need to copy the `example-settings.py` file to `settings.py` and enter the Pico IDs you want to search for (not UUIDs, although that might be a better approach in the future).
+You need to copy the `example-settings.py` file to `settings.py` and enter the Pico IDs you want to search for. You'll need the UUID of your Pico as a string.
