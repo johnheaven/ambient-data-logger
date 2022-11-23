@@ -2,7 +2,9 @@ import requests
 import time
 import csv
 import json
+
 from sqlalchemy import insert, table, text
+from sqlalchemy.schema import Table, MetaData
 
 from ip_search.ip_search import ip_search
 from settings import sensor_ids
@@ -77,9 +79,6 @@ with open(f'data/ambient_data.csv', mode='a', newline='') as csvfile:
 
 ### WRITE TO SQL
 engine = get_sql_engine()
-
-from sqlalchemy import insert
-from sqlalchemy.schema import Table, MetaData
 
 ambient_data_table = Table('ambient_data', MetaData(), autoload_with=engine)
 
