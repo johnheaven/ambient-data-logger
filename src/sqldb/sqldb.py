@@ -24,13 +24,3 @@ def get_sql_engine():
 
     engine = create_engine(DB_STRING)
     return engine
-
-
-def df_from_sql(sql_query='SELECT * FROM matomo_log_visit LIMIT 1000000', parse_dates=None, index_col=None):
-    import pandas as pd
-    engine = get_sql_engine()
-    df = pd.read_sql(sql=sql_query, con=engine, parse_dates=parse_dates, index_col=index_col)
-
-    return df
-
-#write_to_sql()
