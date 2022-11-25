@@ -52,6 +52,8 @@ for sensor_id in sensor_ids:
                     # check whether it's from the right Pico (for the case that there are several)
                     if ambient_data['pico_id'] == sensor_id:
                         success = True
+                finally:
+                    response.close()
         # bump the IP up one so we can try it next.
         # don't do this if success==True so we can preserve the right value for storing in env var later
         if not success:
