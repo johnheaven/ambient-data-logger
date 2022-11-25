@@ -27,7 +27,7 @@ class ip_search():
     def bump_sensor_ip(self):
         # try a different IP by bumping up or down - it 'radiates' out from initial
         if self.steps_taken >= self.max_steps:
-            exhausted = True
+            self.exhausted = True
         elif self.add_next:
             self.steps_taken += 1
             self.current = self.starting + self.steps_taken
@@ -35,3 +35,6 @@ class ip_search():
             self.current = self.starting - self.steps_taken
         
         self.add_next = not self.add_next
+        
+        return self.exhausted
+        
