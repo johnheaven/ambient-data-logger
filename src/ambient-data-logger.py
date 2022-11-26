@@ -61,14 +61,14 @@ for sensor_id in sensor_ids:
             if not ips.get_uri():
                 print(f'Couldn\'t find device with sensor ID {sensor_id}')
 
+    if success:
+        ambient_data['time'] = time.asctime(time.localtime())
+        print(ambient_data)
 
-    ambient_data['time'] = time.asctime(time.localtime())
-    print(ambient_data)
+        ### WRITE IP TO JSON FOR NEXT TIME
+        json.dump(ips.get_current(), open(f'cache/best-ip-cache__{ sensor_id_clean }.json', 'w'))
 
-    ### WRITE IP TO JSON FOR NEXT TIME
-    json.dump(ips.get_current(), open(f'cache/best-ip-cache__{ sensor_id_clean }.json', 'w'))
-
-    all_ambient_data.append(ambient_data)
+        all_ambient_data.append(ambient_data)
 
 ### WRITE TO CSV
 
