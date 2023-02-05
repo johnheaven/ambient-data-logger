@@ -1,5 +1,5 @@
 class ip_search():
-    def __init__(self, starting_ip_last_3, max_steps=20, ip_template='http://192.168.2.%s/data/'):
+    def __init__(self, starting_ip_last_3, max_steps=100, ip_template='http://192.168.2.%s/data'):
         self.current = starting_ip_last_3
         self.starting = starting_ip_last_3
         # maximum number of steps to take in either direction

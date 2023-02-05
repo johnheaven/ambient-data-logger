@@ -17,13 +17,13 @@ for sensor_id in sensor_ids:
     # last 3 digits of IP address so we can find the right one by trial and error
     try:
         previous_best = json.load(open(f'cache/best-ip-cache__{sensor_id_clean}.json', 'r'))
-    except FileNotFoundError as e:
+    except (json.JSONDecodeError, FileNotFoundError) as e:
         print(e)
         starting_ip_last_3 = 145
     else:
         starting_ip_last_3 = previous_best
 
-    ips = ip_search(starting_ip_last_3=starting_ip_last_3, max_steps=10)
+    ips = ip_search(starting_ip_last_3=starting_ip_last_3, max_steps=100)
 
     ### GET DATA
 
