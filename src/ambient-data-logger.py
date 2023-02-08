@@ -10,10 +10,12 @@ from sqldb.sqldb import get_sql_engine
 
 all_ambient_data = []
 
+ip_list = None
+
 for sensor_id in sensor_ids:
     sensor_id_clean = sensor_id.replace(' ', '_')
 
-    ips = ip_search(sensor_id=sensor_id_clean, max_steps=100)
+    ips = ip_search(sensor_id=sensor_id_clean, max_steps=100, ip_list=ip_list)
 
     ### GET DATA
 
@@ -59,6 +61,8 @@ for sensor_id in sensor_ids:
         ips.write_cache()
 
         all_ambient_data.append(ambient_data)
+
+        ip_list = ips.get_untried_ips()
 
 ### WRITE TO CSV
 

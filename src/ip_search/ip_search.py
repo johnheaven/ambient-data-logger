@@ -1,9 +1,10 @@
 import ipaddress
 class ip_search():
-    def __init__(self, sensor_id, starting_ip: str='192.168.2.118', max_steps=100, ip_mask='192.168.2.0/24', uri_template='http://%s/data', cached=True):
+    def __init__(self, sensor_id, starting_ip: str='192.168.2.118', max_steps=100, ip_mask='192.168.2.0/24', uri_template='http://%s/data', ip_list: tuple=None, cached=True):
 
-        # get all possible IPs
-        self.network_ips = list(ipaddress.ip_network(ip_mask).hosts())
+        # get all possible IPs - only generate new list if an existing one isn't provided
+        self.network_ips = tuple(ipaddress.ip_network(ip_mask).hosts()) if (not ip_list) else ip_list
+        self.tried_ips = []
 
         self.uri_template = uri_template
 
@@ -62,10 +63,16 @@ class ip_search():
         else:
             self.current = self.starting - self.steps_taken
         
+        # this ensures that the direction alternates each time
         self.add_next = not self.add_next
         
+        self.tried_ips.append(self.current)
+
         return self.exhausted
-        
+
+    def get_untried_ips(self):
+        return tuple((self.network_ips[idx] for idx in range(len(self.network_ips)) if idx not in self.tried_ips))
+
     def write_cache(self):
         with open(f'cache/best-ip-cache__{ self.sensor_id }.json', 'w') as f:
             f.write(str(self.get_current()))
