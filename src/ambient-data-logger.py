@@ -1,9 +1,7 @@
 import requests
 import time
 import csv
-import json
 
-from sqlalchemy import insert, table, text
 from sqlalchemy.schema import Table, MetaData
 
 from ip_search.ip_search import ip_search
