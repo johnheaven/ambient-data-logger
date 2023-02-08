@@ -1,7 +1,6 @@
+import json
 class ip_search():
-    def __init__(self, starting_ip_last_3, max_steps=100, ip_template='http://192.168.2.%s/data'):
-        self.current = starting_ip_last_3
-        self.starting = starting_ip_last_3
+    def __init__(self, sensor_id, starting_ip_last_3=None, max_steps=100, ip_template='http://192.168.2.%s/data', cached=True):
         # maximum number of steps to take in either direction
         self.max_steps = max_steps
         # the template to insert the last 3 digits into
@@ -15,6 +14,23 @@ class ip_search():
         # number of steps taken so far
         self.steps_taken = 0
     
+        self.sensor_id = sensor_id
+
+        if not any((starting_ip_last_3, cached)):
+            raise ValueError('Either starting_ip_last_3 must be set or cached must be `True`')
+
+        if cached:
+            # try to get a cached value, otherwise set to 145
+            try:
+                self.current = self.starting \
+                    = json.load(open(f'cache/best-ip-cache__{sensor_id}.json', 'r'))
+            except (json.JSONDecodeError, FileNotFoundError) as e:
+                print(e)
+                starting_ip_last_3 = 145
+
+        self.current = starting_ip_last_3
+        self.starting = starting_ip_last_3
+
     def get_uri(self):
         if self.exhausted:
             return False
@@ -38,3 +54,5 @@ class ip_search():
         
         return self.exhausted
         
+    def write_cache(self):
+        json.dump(self.get_current(), open(f'cache/best-ip-cache__{ self.sensor_id }.json', 'w'))

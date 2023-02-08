@@ -14,16 +14,8 @@ all_ambient_data = []
 
 for sensor_id in sensor_ids:
     sensor_id_clean = sensor_id.replace(' ', '_')
-    # last 3 digits of IP address so we can find the right one by trial and error
-    try:
-        previous_best = json.load(open(f'cache/best-ip-cache__{sensor_id_clean}.json', 'r'))
-    except (json.JSONDecodeError, FileNotFoundError) as e:
-        print(e)
-        starting_ip_last_3 = 145
-    else:
-        starting_ip_last_3 = previous_best
 
-    ips = ip_search(starting_ip_last_3=starting_ip_last_3, max_steps=100)
+    ips = ip_search(sensor_id=sensor_id_clean, max_steps=100)
 
     ### GET DATA
 
@@ -66,7 +58,7 @@ for sensor_id in sensor_ids:
         print(ambient_data)
 
         ### WRITE IP TO JSON FOR NEXT TIME
-        json.dump(ips.get_current(), open(f'cache/best-ip-cache__{ sensor_id_clean }.json', 'w'))
+        ips.write_cache()
 
         all_ambient_data.append(ambient_data)
 
@@ -88,5 +80,5 @@ with engine.connect() as conn:
     # see example: https://stackoverflow.com/questions/64090818/unconsumed-column-names-sqlalchemy-python
     for ambient_data in all_ambient_data:
         conn.execute(
-            ambient_data_table.insert(ambient_data)
+            ambient_data_table.insert().values(ambient_data)
         )
