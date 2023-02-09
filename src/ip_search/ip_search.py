@@ -27,7 +27,7 @@ class ip_search():
         if cached:
             try:
                 with open(f'cache/best-ip-cache__{sensor_id}.json', 'r') as f:
-                    cached_ip = f.readline()
+                    cached_ip = f.readline().strip()
                     if not cached_ip:
                         if starting_ip:
                             cached_ip = starting_ip
