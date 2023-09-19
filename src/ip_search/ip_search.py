@@ -11,9 +11,10 @@ logging.basicConfig(level=logging.INFO)
 
 class IPSearch:
     @staticmethod
-    def pipeline(first: str, last: str) -> Iterable:
+    async def pipeline(first: str, last: str) -> Iterable:
         ip_iter = IPSearch.ip_iter(first, last)
-        payloads = asyncio.run(IPSearch.get_payloads(ip_iter))
+        payloads = await IPSearch.get_payloads(ip_iter)
+        payloads = IPSearch.filter_payloads(payloads)
         logging.info(payloads)
         return payloads
 
@@ -56,8 +57,8 @@ class IPSearch:
 
     @staticmethod
     def filter_payloads(payloads) -> Iterable:
-        return filter(bool, payloads)
+        return tuple(filter(bool, payloads))
 
 
 if __name__ == "__main__":
-    IPSearch.pipeline("192.168.2.100", "192.168.2.200")
+    asyncio.run(IPSearch.pipeline("192.168.2.100", "192.168.2.200"))

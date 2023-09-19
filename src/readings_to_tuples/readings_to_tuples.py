@@ -1,16 +1,26 @@
 import json
 from datetime import datetime as dt
+import asyncio
+from itertools import chain
+
 class ReadingsToTuples:
     @staticmethod
-    def pipeline(payloads):
-        payloads_iter = iter(payloads)
-
-        while (readings := next(payloads_iter)):
-            yield ReadingsToTuples.split_readings(readings)
+    async def pipeline(payloads):
+        tasks = []
+        
+        async with asyncio.TaskGroup() as tg:
+            for payload in payloads:
+                tasks.append(
+                    tg.create_task(ReadingsToTuples.split_readings(payload))
+                    )
+        
+        readings_tuples = await asyncio.gather(*tasks)
+        # flatten tuples and return
+        return tuple(chain(*readings_tuples))
     
     @staticmethod
-    def split_readings(readings: str, datetime_obj=dt):
-        readings = json.loads(readings)
+    async def split_readings(readings: str | dict, datetime_obj=dt):
+        if isinstance(readings, str): readings = json.loads(readings)
         reading_tuples = []
         now_str = datetime_obj.now().strftime("%Y-%m-%d %H:%M:%S")
 

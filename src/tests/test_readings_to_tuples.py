@@ -4,6 +4,7 @@ import pytest
 
 from readings_to_tuples.readings_to_tuples import ReadingsToTuples
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "readings, database_tuples",
     [
@@ -21,7 +22,7 @@ from readings_to_tuples.readings_to_tuples import ReadingsToTuples
         ))
     ]
     )
-def test_split_readings(readings, database_tuples):
+async def test_split_readings(readings, database_tuples):
 
     # set up datetime object -> can't use monkeypatch because this is immutable
     class FakeNow(dt):
@@ -31,7 +32,7 @@ def test_split_readings(readings, database_tuples):
             return dt(2023, 3, 12, 13, 37, 5, 10398)
 
     # readings => database_tuples
-    split_readings = ReadingsToTuples.split_readings(readings=readings, datetime_obj=FakeNow)
+    split_readings = await ReadingsToTuples.split_readings(readings=readings, datetime_obj=FakeNow)
 
     # nested tuples in form (timestamp, pico_id, pico_uuid, sensor, key, value) for each variable i.e. pressure, temperature and humidity separately
     assert sorted(split_readings, key=lambda item: str(item)) == sorted(database_tuples, key=lambda item: str(item))
