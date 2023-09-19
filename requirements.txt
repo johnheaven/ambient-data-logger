@@ -1,4 +1,7 @@
-requests
 sqlalchemy
 python-dotenv
 psycopg2-binary
+pytest
+pytest-asyncio
+httpx
+pytest-httpx

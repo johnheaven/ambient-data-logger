@@ -1,78 +1,59 @@
 import ipaddress
-class ip_search():
-    def __init__(self, sensor_id, starting_ip: str='192.168.2.118', max_steps=100, ip_mask='192.168.2.0/24', uri_template='http://%s/data', ip_list: tuple=None, cached=True):
+import asyncio
+from os import path
+import logging
+from typing import Iterable
+from itertools import chain
+import json
 
-        # get all possible IPs - only generate new list if an existing one isn't provided
-        self.network_ips = tuple(ipaddress.ip_network(ip_mask).hosts()) if (not ip_list) else ip_list
-        self.tried_ips = []
+import httpx
 
-        self.uri_template = uri_template
 
-        # maximum number of steps to take in either direction
-        self.max_steps = max_steps
-        # the iteration we're on, e.g. whether we've passed ip_max and restarted from ip_min
-        self.search_iter = 0
-        # whether we've tried all IPs
-        self.exhausted = False
-        # whether  to add or subtract to find next IP
-        self.add_next = True
-        # number of steps taken so far
-        self.steps_taken = 0
-    
-        self.sensor_id = sensor_id
+logging.basicConfig(level=logging.INFO)
 
-        if not any((starting_ip, cached)):
-            raise ValueError('Either starting_ip must be set or cached must be `True`')
+class IPSearch():
+    @staticmethod
+    def pipeline(first: str, last: str):
+        ip_iter = IPSearch.ip_iter(first, last)
+        payloads = asyncio.run(IPSearch.get_payloads(ip_iter))
+        logging.info(payloads)
 
-        if cached:
-            try:
-                with open(f'cache/best-ip-cache__{sensor_id}.json', 'r') as f:
-                    cached_ip = f.readline().strip()
-                    if not cached_ip:
-                        if starting_ip:
-                            cached_ip = starting_ip
-                        else:
-                            raise RuntimeError('Couldn\'t find cached value and no starting IP specified.')
-                
-            except (FileNotFoundError, ValueError) as e:
-                cached_ip = starting_ip
-            
-            finally:
-                self.current = self.starting \
-                    = self.network_ips.index(ipaddress.ip_address(cached_ip))
-                
-        else:
-            self.current = self.starting = self.network_ips.index(ipaddress.ip_address(starting_ip))
+    @staticmethod
+    def ip_iter(first: str, last: str) -> Iterable:
+        range = (
+            ipaddress.IPv4Address(first),
+            ipaddress.IPv4Address(last)
+        )
+        networks = ipaddress.summarize_address_range(*range)
 
-    def get_uri(self):
-        if self.exhausted:
-            return False
-        else:
-            return self.uri_template % self.network_ips[self.current]
+        ip_iter = chain(*networks)
 
-    def get_current(self):
-        return self.network_ips[self.current]
+        return ip_iter
 
-    def bump_sensor_ip(self):
-        # try a different IP by bumping up or down - it 'radiates' out from initial
-        if self.steps_taken >= self.max_steps or self.current == 1 or (self.current + 1) == len(self.network_ips):
-            self.exhausted = True
-        elif self.add_next:
-            self.steps_taken += 1
-            self.current = self.starting + self.steps_taken
-        else:
-            self.current = self.starting - self.steps_taken
+    @staticmethod
+    async def get_payload(device_path: str, httpx_obj=httpx, timeout=5) -> list | dict | None:
+        try:
+            async with httpx_obj.AsyncClient() as client:
+                response = await client.get(url=device_path, timeout=httpx.Timeout(timeout=timeout))
+                assert response.status_code == 200
+                payload = response.json()
+        except Exception as e:
+            # couldn't connect at all, didn't get a 200 response code, or couldn't convert response to json
+            payload = None
         
-        # this ensures that the direction alternates each time
-        self.add_next = not self.add_next
-        
-        self.tried_ips.append(self.current)
+        logging.debug(f"device_path: { device_path }")
+        if payload: logging.debug(f"Payload: { payload }")
+        return payload
 
-        return self.exhausted
+    @staticmethod
+    async def get_payloads(ips, timeout=5) -> Iterable:
+        async with asyncio.TaskGroup() as tg:
+            payload_tasks = [
+                tg.create_task(IPSearch.get_payload(
+                    path.join("http://", str(ip), "data"), httpx, timeout
+                    )) for ip in ips
+                ]
+        return asyncio.gather(*payload_tasks)
 
-    def get_untried_ips(self):
-        return tuple((self.network_ips[idx] for idx in range(len(self.network_ips)) if idx not in self.tried_ips))
-
-    def write_cache(self):
-        with open(f'cache/best-ip-cache__{ self.sensor_id }.json', 'w') as f:
-            f.write(str(self.get_current()))
+if __name__ == "__main__":
+    IPSearch.pipeline("192.168.2.100", "192.168.2.200")
