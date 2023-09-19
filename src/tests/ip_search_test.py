@@ -10,7 +10,6 @@ from pytest import fixture
 import httpx
 import pytest_httpx
 
-
 from ip_search.ip_search import IPSearch
 
 ## SETUP
