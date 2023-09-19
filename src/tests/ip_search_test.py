@@ -16,7 +16,7 @@ from ip_search.ip_search import IPSearch
 ## SETUP
 
 first = "192.168.2.101"
-last = "192.168.2.102"
+last = "192.168.2.200"
 
 ### FIXTURES ###
 
@@ -77,9 +77,15 @@ def payloads(ips):
 
 @pytest.mark.asyncio
 async def test_payloads(payloads):
-    # just a placeholder to pull in payloads from fixture
+    # just a placeholder to pull in payloads from fixture to see if it works
     pass
 
 @pytest.mark.asyncio
 async def test_payloads_type(payloads):
-    assert isinstance(payloads, list)
+    assert isinstance(payloads, Iterable)
+
+# FILTER #
+
+def test_payloads_filtered():
+    payloads = [None, None, "{'Some': 'json'}"]
+    assert tuple(IPSearch.filter_payloads(payloads)) == ("{'Some': 'json'}",)

@@ -4,19 +4,18 @@ from os import path
 import logging
 from typing import Iterable
 from itertools import chain
-import json
 
 import httpx
 
-
 logging.basicConfig(level=logging.INFO)
 
-class IPSearch():
+class IPSearch:
     @staticmethod
-    def pipeline(first: str, last: str):
+    def pipeline(first: str, last: str) -> Iterable:
         ip_iter = IPSearch.ip_iter(first, last)
         payloads = asyncio.run(IPSearch.get_payloads(ip_iter))
         logging.info(payloads)
+        return payloads
 
     @staticmethod
     def ip_iter(first: str, last: str) -> Iterable:
@@ -53,7 +52,12 @@ class IPSearch():
                     path.join("http://", str(ip), "data"), httpx, timeout
                     )) for ip in ips
                 ]
-        return asyncio.gather(*payload_tasks)
+        return await asyncio.gather(*payload_tasks)
+
+    @staticmethod
+    def filter_payloads(payloads) -> Iterable:
+        return filter(bool, payloads)
+
 
 if __name__ == "__main__":
     IPSearch.pipeline("192.168.2.100", "192.168.2.200")
