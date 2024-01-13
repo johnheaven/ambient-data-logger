@@ -52,7 +52,7 @@ async def test_check_ip(httpx_mock):
 @pytest_asyncio.fixture
 async def ip_queue(ip_iter, httpx_mock):
     queue_out = asyncio.Queue()
-    httpx_mock.add_response(url="192.168.2.101")
+    httpx_mock.add_response(url="http://192.168.2.101")
     httpx_mock.add_exception(httpx.TimeoutException("Timeout"))
     task = asyncio.create_task(IPSearch.populate_ip_queue(queue_in=ip_iter, queue_out=queue_out, httpx_obj=httpx))
     await asyncio.sleep(0.5)
@@ -63,7 +63,7 @@ async def ip_queue(ip_iter, httpx_mock):
 @pytest.mark.asyncio
 async def test_populate_ip_queue(ip_queue):
     assert 1 == ip_queue.qsize()
-    results = await ip_queue.get_nowait()
+    results = ip_queue.get_nowait()
     assert str(results) == "192.168.2.101"
 
 # IP to path #
@@ -83,7 +83,7 @@ async def paths_queue(ip_queue):
 @pytest.mark.asyncio
 async def test_ips_to_paths(paths_queue):
     assert isinstance(paths_queue, asyncio.Queue)
-    assert (await paths_queue.get_nowait()) == "http://192.168.2.101/data"
+    assert paths_queue.get_nowait() == "http://192.168.2.101/data"
 
 # DATA RETRIEVAL #
 

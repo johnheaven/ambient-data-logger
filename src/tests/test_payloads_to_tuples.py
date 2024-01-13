@@ -6,13 +6,13 @@ import pytest
 from ..helpers.payloads_to_tuples import PayloadsToTuples
 
 test_data = [
-        ('{"pressure": null, "sensor": "dht22", "pico_id": "office", "pico_uuid": "5mFBA+c0kiQ=", "humidity": 66.9, "temp": 21.9}',
+        ({"pressure": None, "sensor": "dht22", "pico_id": "office", "pico_uuid": "5mFBA+c0kiQ=", "humidity": 66.9, "temp": 21.9},
         (
             ("2023-03-12 13:37:05", "office", "5mFBA+c0kiQ=", "dht22", "pressure", None),
             ("2023-03-12 13:37:05", "office", "5mFBA+c0kiQ=", "dht22", "humidity", 66.9),
             ("2023-03-12 13:37:05", "office", "5mFBA+c0kiQ=", "dht22", "temp", 21.9)
         )),
-        ('{"pressure": 2569.15, "sensor": "bme280", "pico_id": "bedroom", "pico_uuid": "5mFkCEMtfCM=", "humidity": 70.994, "temp": 19.83}',
+        ({"pressure": 2569.15, "sensor": "bme280", "pico_id": "bedroom", "pico_uuid": "5mFkCEMtfCM=", "humidity": 70.994, "temp": 19.83},
         (
             ("2023-03-12 13:37:05", "bedroom", "5mFkCEMtfCM=", "bme280", "pressure", 2569.15),
             ("2023-03-12 13:37:05", "bedroom", "5mFkCEMtfCM=", "bme280", "humidity", 70.994),

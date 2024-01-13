@@ -1,6 +1,6 @@
 import asyncio
 import functools
-from typing import Coroutine, Iterator, Iterable, Tuple
+from typing import Callable, Coroutine, Iterator, Iterable, Tuple
 
 ### WORKER DECORATOR TO TURN FUNCTION INTO ASYNC WORKER ###
 
