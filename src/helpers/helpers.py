@@ -1,10 +1,29 @@
 import asyncio
 import functools
-from typing import Callable, Iterator, Iterable, Tuple
+from typing import Coroutine, Iterator, Iterable, Tuple
 
 ### WORKER DECORATOR TO TURN FUNCTION INTO ASYNC WORKER ###
 
-def worker(func, add_none=True, flatten=False):
+def worker(func: Coroutine, add_none: bool = True, flatten: bool = False) -> Coroutine:
+    """Takes an async function and turns it into a pipeline function that takes an async "in" queue
+    and an async "out" queue, i.e. you can call it as follows:
+        func(queue_in, queue_out)
+    
+    Items from queue_in are then passed into func's input argument and func's return values are
+    added to queue_out.
+
+    This is useful for writing a simple function that can process one item without having to write the
+    surrounding pipeline logic.
+
+    Args:
+        func (Coroutine): The async function that takes an input and returns a value
+        add_none (bool, optional): If func returns None, whether to add this to queue_out. Can be useful for filtering to remove the None values. Defaults to True.
+        flatten (bool, optional): If func returns an iterable, whether to flatten it before adding it to queue_out. Defaults to False.
+
+    Returns:
+        Coroutine: A coroutine that takes a queue_in and queue_out. Items from queue_in are processed by func and put into queue_out.
+    """
+
     async def worker_wrapper(func, queue_in: asyncio.Queue | Iterator, queue_out: asyncio.Queue, *args, add_none, flatten, test_inner=False, **kwargs):
         # for testing the inner function only
         if test_inner: return func(*args, **kwargs)
@@ -34,8 +53,18 @@ def worker(func, add_none=True, flatten=False):
 
 ### ASYNC CHAIN FOR EASILY CHAINING WORKERS TOGETHER ###
 
-async def async_chain(*functions: Callable | Tuple[Tuple[Callable, int]], queue_in: asyncio.Queue | Iterable, queue_out: asyncio.Queue, tg: asyncio.TaskGroup) -> Iterable[asyncio.Task]:
-    # chain a series of async tasks with queues, so the first function consumes the input queue and the last one feeds the output queue
+async def async_chain(*functions: Callable | Tuple[Tuple[Callable, int]], queue_in: asyncio.Queue | Iterable, queue_out: asyncio.Queue, tg: asyncio.TaskGroup) -> list[asyncio.Task]:
+    """ Chain a series of async tasks with queues, so the first function consumes the input queue and the last one feeds the output queue
+
+    Args:
+        queue_in (asyncio.Queue | Iterable): The item to take input from
+        queue_out (asyncio.Queue): Output queue
+        tg (asyncio.TaskGroup): An existing task group
+
+    Returns:
+        List[asyncio.Task]: List of async tasks
+    """
+    
     queues = [queue_in] + [asyncio.Queue() for _ in range(len(functions) - 1)] + [queue_out]
     # create a task for each functions, passing in queue 1 and queue 2 to function 1, queue 2 and queue 3 to function 2 etc.
     tasks = []
