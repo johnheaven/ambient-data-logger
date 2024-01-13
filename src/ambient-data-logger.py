@@ -4,7 +4,7 @@ import csv
 
 from sqlalchemy.schema import Table, MetaData
 
-from ip_search.ip_search import ip_search
+from helpers.ip_search import ip_search
 from settings import sensor_ids
 from sqldb.sqldb import get_sql_engine
 
